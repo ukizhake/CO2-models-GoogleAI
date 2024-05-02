@@ -28,6 +28,103 @@ async def get_response(messages, model="gemini-pro"):
                                 safety_settings={'HARASSMENT':'block_none'})
     res.resolve()
     return res
+def green_score_calc(liv_type, house,diet,how_often_water,heating_energy_source,transport,buying_activity,
+                               frequency_of_traveling_by_air,waste_bag_week,energy_efficiency,recycling):
+    liv_type = st.text_input("Live with more than 2 people-yes/no (points- 6/12)", "yes", key="ltyp")
+    score=0
+    if (house == "large") :
+        score +=10
+    elif (house=="medium"):
+        score+=7
+    elif (house=="small"):
+        score+=4
+    
+    if (diet == "vegan") :
+        score +=2
+    elif (diet=="vegetarian"):
+        score+=4
+    elif (diet=="pescatarian"):
+        score+=8
+    elif (diet=="omnivore"):
+        score+=10
+
+    if (how_often_water == 3) :
+        score +=5
+    elif (how_often_water==7):
+        score+=10
+
+    if (heating_energy_source == "solar") :
+        score +=10
+    elif (heating_energy_source=="gas"):
+        score+=20
+    elif (heating_energy_source=="coal"):
+        score+=30
+    elif (heating_energy_source=="electricity"):
+        score+=10
+
+
+    if (transport == "public") :
+        score +=-20
+    elif (transport=="electric"):
+        score+=-20
+    elif (transport=="hybrid"):
+        score+=-15
+    elif (transport=="gasoline"):
+        score+=20
+    elif (transport=="bikewalk"):
+        score+=-40
+
+    if (buying_activity > 15 ) :
+        score += 10
+    elif (buying_activity > 10):
+        score+=7
+    elif (buying_activity > 5):
+        score+=4
+
+    if (frequency_of_traveling_by_air > 15 ) :
+        score += 60
+    elif (frequency_of_traveling_by_air > 10):
+        score+=40
+    elif (frequency_of_traveling_by_air > 5):
+        score+=20
+
+    if (waste_bag_week > 8 ) :
+        score += 50
+    elif (waste_bag_week > 4):
+        score+=30
+    elif (waste_bag_week > 2):
+        score+=10
+
+    if (energy_efficiency == "yes" ) :
+        score += -10
+    elif (energy_efficiency == "no"):
+        score+=10
+
+    if (recycling and recycling.index("Glass") > 0 ) :
+        score += -4
+    elif (recycling and recycling.index("Plastic") > 0 ) :
+        score += -4    
+    elif (recycling and recycling.index("Paper") > 0 ) :
+        score += -4   
+    elif (recycling and recycling.index("Aluminum") > 0 ) :
+        score += -4    
+    elif (recycling and recycling.index("Steel") > 0 ) :
+        score += -4
+    elif (recycling and recycling.index("Food") > 0 ) :
+        score += -4    
+
+
+    if (cooking_with and cooking_with.index("stove") > 0 ) :
+        score += 10
+    elif (cooking_with and cooking_with.index("coal") > 0 ) :
+        score += 20
+    elif (cooking_with and cooking_with.index("wood") > 0 ) :
+        score += 20
+    elif (cooking_with and cooking_with.index("electric") > 0 ) :
+        score += -10
+    elif (cooking_with and cooking_with.index("microwave") > 0 ) :
+        score += -10
+    return score
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
@@ -40,39 +137,40 @@ if messages :
         elif role == "model":
             st.chat_message("assistant").markdown(parts[0])
 print("ushakiz ====")
-body_type = st.text_input("Body Type", "overweight", key="btyp")
-sex = st.text_input("Sex", "female", key="sx")
-diet = st.text_input("Diet", "vegetarian", key="dt")
-how_often_shower = st.text_input("How Often Shower", "daily", key="shwr")
-heating_energy_source = st.text_input("Heating Energy Source", "solar", key="ensrc")
-transport = st.text_input("Transport", "hybrid", key="trans")
-vehicle_type = st.text_input("Vehicle Type", "sedan", key="vt")
-social_activity = st.text_input("Social Activity", "sometimes", key="sa")
-frequency_of_traveling_by_air = st.text_input("Frequency of Traveling by Air", "sometimes", key="at")
-waste_bag_size = st.text_input("Waste Bag Size", "medium", key="wb")
-energy_efficiency = st.text_input("Energy Efficiency", "yes", key="ef")
-recycling = st.text_input("Recycling", "plastic and metal", key="re")
-cooking_with = st.text_input("Cooking With", "stove", key="cw")
+liv_type = st.text_input("Live with more than 2 people-yes/no (points- 6/12)", "yes", key="ltyp")
+house = st.text_input("House-large, medium, small (points- 10/7/4)", "large", key="hs")
+diet = st.text_input("Diet-vegan/vegetarian/pescatarian/omnivore (points-2/4/8/10)", "vegetarian", key="dt")
+how_often_water = st.text_input("How Often Do You Use Washing Machine/Dishwasher a week - 3/7  (points- 5/10)", "3", key="water")
+heating_energy_source = st.text_input("Heating Energy Source-Solar/gas/coal/electricity (points- -10/20/30/10)", "solar", key="ensrc")
+transport = st.text_input("Transport", "public/electric/hybrid/gasoline/bikewalk (points- -20/-20/-15/20/-40)", key="trans")
+buying_activity = st.text_input("Buying Activity-5/10/15 purchases a year (points-4/7/10)", "5", key="buy")
+frequency_of_traveling_by_air = st.text_input("Frequency of Traveling Long Distance-5/10/15 times a year (points-20/40/60)", "3", key="at")
+waste_bag_week = st.text_input("#1/2 gallon waste Bags a week - 8/4/2 (points-50/30/10)", "2", key="wb")
+energy_efficiency = st.text_input("Energy Efficiency Applianes - yes/no (points- minus 10 if energy efficient)", "yes", key="ef")
+recycling = st.text_input("Recycling-Glass/Plastic/Paper/Aluminum/Steel/Food (points-minus 4 for each)", "Plastic,Food", key="re")
+cooking_with = st.text_input("Cooking With stove/coal/electric/microwave (points- 10/20/20/-10/-10)", "stove/coal/wood/electric/microwave", key="cw")
 chat_message = st.chat_input("Given above info and the dataframe, calculate my carbon footprint. Also calculate my green score (on a scale of 1 to 10) giving highest weightage to transportation and energy used, moderate weightage to waste and food ")
 
 # Construct the Prompt (Tailored for Carbon Footprint Estimation)
 prompt = f"Given my following lifestyle:\n" \
-        f"- Body Type: {body_type}\n" \
-        f"- Sex: {sex}\n" \
+        f"- Live With More Than 2 People: {liv_type}\n" \
+        f"- House: {house}\n" \
         f"- Diet: {diet}\n" \
-        f"- How Often Shower: {how_often_shower}\n" \
+        f"- How Often Water Used for Dish Washing, Washing Machine: {how_often_water}\n" \
         f"- Heating Energy Source: {heating_energy_source}\n" \
-        f"- Transport: {transport}\n" \
-        f"- Vehicle Type: {vehicle_type}\n" \
-        f"- Social Activity: {social_activity}\n" \
+        f"- Transport Type: {transport}\n" \
+        f"- Buying Activity(Extravagant Purchases every year): {buying_activity}\n" \
         f"- Frequency of Traveling by Air: {frequency_of_traveling_by_air}\n" \
-        f"- Waste Bag Size: {waste_bag_size}\n" \
-        f"- Energy Efficiency: {energy_efficiency}\n" \
-        f"- Recycling: {recycling}\n" \
-        f"- Cooking With: {cooking_with}\n" \
-        f"Type yes and hit enter to estimate my carbon footprint and provide a green score (out of 10) considering factors like transportation, energy use, and consumption habits based on the information provided."
-
-
+        f"- Waste Bag Size: {waste_bag_week}\n" \
+        f"- Energy Efficiency Appliances: {energy_efficiency}\n" \
+        f"- Recycling Type: {recycling}\n" \
+        f"- Cooking With: {recycling}\n" \
+        f"Type yes and hit enter to estimate my carbon footprint and recommendations to reduce my carbon footprint"
+green_score = green_score_calc(liv_type, house,diet,how_often_water,heating_energy_source,transport,buying_activity,
+                               frequency_of_traveling_by_air,waste_bag_week,energy_efficiency,recycling,recycling)
+green_score_message = "Oof! Your carbon footprint is high(> 60). Find ways to reduce your impact on the planet."
+if (green_score < 60):
+    green_score_message = "Congratulations! You are doing a great job. Your score is less than 60."
 if chat_message:
     st.chat_message("user").markdown(chat_message)
     res_area = st.chat_message("assistant").empty()
@@ -81,7 +179,7 @@ if chat_message:
         {"role": "user", "parts":  [prompt]},
     )
     res = get_response(messages)
-    res_text=''
+    res_text='Your green score is '+green_score+". "+green_score_message 
     for chunk in response:
         res_text += chunk.parts[0].text
 
