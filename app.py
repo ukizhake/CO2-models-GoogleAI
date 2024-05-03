@@ -21,14 +21,15 @@ load_dotenv()
 genai.configure( api_key = os.environ["GOOGLE_API_KEY"] )
 model = genai.GenerativeModel('gemini-pro')
 df = pd.read_csv('indivCarbonEmission.csv')
-response = model.generate_content("use the content in  the data frame generated above  to create a text summary for carbon footprints")
-to_markdown(response.parts[0].text)
-print("ushakiz 222222")
+# response = model.generate_content("use the content in  the data frame generated above  to create a text summary for carbon footprints")
+# to_markdown(response.parts[0].text)
+# print("ushakiz 222222")
 
-async def get_response(messages, model="gemini-pro"):
-    res = await model.generate_content(messages, stream=True,
+async def get_response(prompt, model="gemini-pro"):
+    print("messages", prompt);
+    res = await model.generate_content(messages, stream=False,
                                 safety_settings={'HARASSMENT':'block_none'})
-    res.resolve()
+    # res.resolve()
     return res
 
 def plot_total(df, col:str, val):
@@ -217,6 +218,8 @@ recycling = st.text_input("Recycling-Glass/Plastic/Paper/Aluminum/Steel/Food (po
 cooking_with = st.text_input("Cooking With stove/coal/electric/microwave", "stove,microwave", key="cw")
 chat_message = st.chat_input("Click the button or type enter here. Calculate my carbon footprint. Calculate my green score and give me recommendations to reduce my carbon footprint")
 
+recommendation_str = "larger homes, many waste bags, eating meat, using washing machines often, using coal for heating, buying too many things  have a high impact on planet earth. to reduce the impact consider using energy efficient appliances, using small and fewer waste bags, recycling \
+    glass, plastic, food etc as much as possible, buying fewer things, consider thrifting, make fewer long distance trips, and cook with electric appliances"
 # Construct the Prompt (Tailored for Carbon Footprint Estimation)
 prompt = f"Given my following lifestyle:\n" \
         f"- Live With More Than 2 People: {liv_type}\n" \
@@ -231,7 +234,7 @@ prompt = f"Given my following lifestyle:\n" \
         f"- Energy Efficiency Appliances: {energy_efficiency}\n" \
         f"- Recycling Type: {recycling}\n" \
         f"- Cooking With: {cooking_with}\n" \
-        f"Type yes and hit enter to estimate my carbon footprint and recommendations to reduce my carbon footprint"
+        f" Please assess my impact on planet earth and give me some recommendations to reduce my carbon footprint. Also here are some recommendations "+recommendation_str
 green_score = green_score_calc(liv_type, house,diet,how_often_water,heating_energy_source,transport,buying_activity,
                                frequency_of_traveling_by_air,waste_bag_week,energy_efficiency,recycling,cooking_with)
 green_score_message = "Oof! Your carbon footprint is high(> 60). Find ways to reduce your impact on the planet.\n"
@@ -241,14 +244,19 @@ if st.button("GET MY GREEN SCORE")  or st.chat_message:
     st.chat_message("user").markdown(chat_message)
     res_area = st.chat_message("assistant").empty()
     messages.append(
-        {"role": "user", "parts":  ["prompt"]},
+        {"role": "user", "parts":  ["Show me my green score"]},
     )
-    res = get_response(messages)
-    plot_transport = plot_against(df, "Transport", 0)
-    res_text='Your green score is '+str(green_score)+". "+green_score_message 
-    for chunk in response:
-        res_text += chunk.parts[0].text
+    res = model.generate_content(prompt, stream=True,
+                                safety_settings={'HARASSMENT':'block_none'})
+    res.resolve()
+    print("res rsolved ",res)
 
+    # res = get_response(prompt)
+    plot_transport = plot_against(df, "Transport", 0)
+    res_text='Your green score is '+str(green_score)+". "+green_score_message+". "
+    for chunk in res:
+        res_text += chunk.parts[0].text
+    # res_text += res
     res_area.markdown(res_text)
     messages.append({"role": "model", "parts": [res_text]})
     st.pyplot(plot_transport.gcf())
