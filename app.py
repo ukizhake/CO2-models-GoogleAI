@@ -201,6 +201,8 @@ if messages :
         elif role == "model":
             st.chat_message("assistant").markdown(parts[0])
 print("ushakiz ====")
+st.title("Welcome to Green Score")
+st.text("Please fill out the form below")
 liv_type = st.text_input("Live with more than 2 people-yes/no (points- 6/12)", "yes", key="ltyp")
 house = st.text_input("House-large, medium, small (points- 10/7/4)", "large", key="hs")
 diet = st.text_input("Diet-vegan/vegetarian/pescatarian/omnivore (points-2/4/8/10)", "vegetarian", key="dt")
@@ -213,7 +215,9 @@ waste_bag_week = st.text_input("#1/2 gallon waste Bags a week - 8/4/2 (points-50
 energy_efficiency = st.text_input("Energy Efficiency Applianes - yes/no (points- minus 10 if energy efficient)", "yes", key="ef")
 recycling = st.text_input("Recycling-Glass/Plastic/Paper/Aluminum/Steel/Food (points-minus 4 for each)", "Plastic,Food", key="re")
 cooking_with = st.text_input("Cooking With stove/coal/electric/microwave (points- 10/20/20/-10/-10)", "stove/coal/wood/electric/microwave", key="cw")
-chat_message = st.chat_input("Calculate my carbon footprint. Also calculate my green score and give me recommendations to reduce my carbon footprint")
+st.text("CALCULATE MY GREEN SCORE(carbon footprint) and give me recommendations")
+
+# chat_message = st.chat_input("Type Show or the CLICK ME Button. Calculate my carbon footprint. Also calculate my green score and give me recommendations to reduce my carbon footprint")
 
 # Construct the Prompt (Tailored for Carbon Footprint Estimation)
 prompt = f"Given my following lifestyle:\n" \
@@ -229,14 +233,14 @@ prompt = f"Given my following lifestyle:\n" \
         f"- Energy Efficiency Appliances: {energy_efficiency}\n" \
         f"- Recycling Type: {recycling}\n" \
         f"- Cooking With: {cooking_with}\n" \
-        f"Type yes and hit enter to estimate my carbon footprint and recommendations to reduce my carbon footprint"
+        f"CLICK ME. This will estimate  carbon footprint and provide recommendations to reduce carbon footprint"
 green_score = green_score_calc(liv_type, house,diet,how_often_water,heating_energy_source,transport,buying_activity,
                                frequency_of_traveling_by_air,waste_bag_week,energy_efficiency,recycling,cooking_with)
 green_score_message = "Oof! Your carbon footprint is high(> 60). Find ways to reduce your impact on the planet.\n"
 if (green_score < 60):
     green_score_message = "Congratulations! You are doing a great job. Your score is less than 60."
-if st.button("show")  or st.chat_message:
-    st.chat_message("user").markdown(chat_message)
+if st.button("CLICK ME"):
+    # st.chat_message("user").markdown(chat_message)
     res_area = st.chat_message("assistant").empty()
     print("prompt", prompt)
     messages.append(
