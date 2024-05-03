@@ -202,22 +202,20 @@ if messages :
             st.chat_message("assistant").markdown(parts[0])
 print("ushakiz ====")
 st.title("Welcome to Green Score")
-st.text("Please fill out the form below")
-liv_type = st.text_input("Live with more than 2 people-yes/no (points- 6/12)", "yes", key="ltyp")
-house = st.text_input("House-large, medium, small (points- 10/7/4)", "large", key="hs")
-diet = st.text_input("Diet-vegan/vegetarian/pescatarian/omnivore (points-2/4/8/10)", "vegetarian", key="dt")
-how_often_water = st.text_input("How Often Do You Use Washing Machine/Dishwasher a week - 3/7  (points- 5/10)", "3", key="water")
-heating_energy_source = st.text_input("Heating Energy Source-Solar/gas/coal/electricity (points- -10/20/30/10)", "solar", key="ensrc")
-transport = st.text_input("Transport", "public/electric/hybrid/gasoline/bikewalk (points- -20/-20/-15/20/-40)", key="trans")
-buying_activity = st.text_input("Buying Activity-5/10/15 purchases a year (points-4/7/10)", "5", key="buy")
-frequency_of_traveling_by_air = st.text_input("Frequency of Traveling Long Distance-5/10/15 times a year (points-20/40/60)", "3", key="at")
-waste_bag_week = st.text_input("#1/2 gallon waste Bags a week - 8/4/2 (points-50/30/10)", "2", key="wb")
-energy_efficiency = st.text_input("Energy Efficiency Applianes - yes/no (points- minus 10 if energy efficient)", "yes", key="ef")
-recycling = st.text_input("Recycling-Glass/Plastic/Paper/Aluminum/Steel/Food (points-minus 4 for each)", "Plastic,Food", key="re")
-cooking_with = st.text_input("Cooking With stove/coal/electric/microwave (points- 10/20/20/-10/-10)", "stove/coal/wood/electric/microwave", key="cw")
-st.text("CALCULATE MY GREEN SCORE(carbon footprint) and give me recommendations")
-
-# chat_message = st.chat_input("Type Show or the CLICK ME Button. Calculate my carbon footprint. Also calculate my green score and give me recommendations to reduce my carbon footprint")
+st.text("Please fill out the form")
+liv_type = st.text_input("Live with more than 2 people-yes/no", "yes", key="ltyp")
+house = st.text_input("House-large, medium, small", "large", key="hs")
+diet = st.text_input("Diet-vegan/vegetarian/pescatarian/omnivore", "omnivore", key="dt")
+how_often_water = st.text_input("How Often Do You Use Washing Machine/Dishwasher a week - 3/7", "7", key="water")
+heating_energy_source = st.text_input("Heating Energy Source-Solar/gas/coal/electricity", "solar", key="ensrc")
+transport = st.text_input("Transport(public/electric/hybrid/gasoline/bikewalk)", "public", key="trans")
+buying_activity = st.text_input("Buying Activity-5/10/15 purchases a year", "55", key="buy")
+frequency_of_traveling_by_air = st.text_input("Frequency of Traveling Long Distance-5/10/15 times a year", "13", key="at")
+waste_bag_week = st.text_input("#1/2 gallon waste Bags a week - 8/4/2", "8", key="wb")
+energy_efficiency = st.text_input("Energy Efficiency Applianes - yes/no (points- minus points if energy efficient)", "yes", key="ef")
+recycling = st.text_input("Recycling-Glass/Plastic/Paper/Aluminum/Steel/Food (points-minus points for each)", "Plastic,Food", key="re")
+cooking_with = st.text_input("Cooking With stove/coal/electric/microwave", "stove,microwave", key="cw")
+chat_message = st.chat_input("Click the button or type enter here. Calculate my carbon footprint. Calculate my green score and give me recommendations to reduce my carbon footprint")
 
 # Construct the Prompt (Tailored for Carbon Footprint Estimation)
 prompt = f"Given my following lifestyle:\n" \
@@ -233,18 +231,17 @@ prompt = f"Given my following lifestyle:\n" \
         f"- Energy Efficiency Appliances: {energy_efficiency}\n" \
         f"- Recycling Type: {recycling}\n" \
         f"- Cooking With: {cooking_with}\n" \
-        f"CLICK ME. This will estimate  carbon footprint and provide recommendations to reduce carbon footprint"
+        f"Type yes and hit enter to estimate my carbon footprint and recommendations to reduce my carbon footprint"
 green_score = green_score_calc(liv_type, house,diet,how_often_water,heating_energy_source,transport,buying_activity,
                                frequency_of_traveling_by_air,waste_bag_week,energy_efficiency,recycling,cooking_with)
 green_score_message = "Oof! Your carbon footprint is high(> 60). Find ways to reduce your impact on the planet.\n"
 if (green_score < 60):
     green_score_message = "Congratulations! You are doing a great job. Your score is less than 60."
-if st.button("CLICK ME"):
-    # st.chat_message("user").markdown(chat_message)
+if st.button("GET MY GREEN SCORE")  or st.chat_message:
+    st.chat_message("user").markdown(chat_message)
     res_area = st.chat_message("assistant").empty()
-    print("prompt", prompt)
     messages.append(
-        {"role": "user", "parts":  [prompt]},
+        {"role": "user", "parts":  ["prompt"]},
     )
     res = get_response(messages)
     plot_transport = plot_against(df, "Transport", 0)
@@ -255,7 +252,5 @@ if st.button("CLICK ME"):
     res_area.markdown(res_text)
     messages.append({"role": "model", "parts": [res_text]})
     st.pyplot(plot_transport.gcf())
-    # plot_food = plot_against(df, "Diet", 0)
-    # st.pyplot(plot_food.gcf())
     plot_total = plot_total(df, "Total", green_score)
     st.pyplot(plot_total.gcf())
