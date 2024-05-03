@@ -1,4 +1,5 @@
 import io
+from typing import Set
 import streamlit as st
 import google.generativeai as genai
 import google.ai.generativelanguage as glm
@@ -30,10 +31,33 @@ async def get_response(messages, model="gemini-pro"):
     res.resolve()
     return res
 
+def plot_total(df, col:str, val):
+    # Create a dataframe
+    # Plot the x and y columns
+    # Create a list of the values in your dataframe
+    values = list(set(df[col].tolist()))
+
+    # Create a list of the number of times each value occurs
+    counts = df[col].value_counts().tolist()
+
+    # Create the bar chart
+    plt.bar(values, counts)
+    plt.axhline(df['Total'].mean(), color='red', linestyle='dashed')
+    plt.axhline(val, color='green', linestyle='dashed')
+
+    # Set the title and labels of the chart
+    plt.title('Distribution of green scores')
+    plt.xlabel('Value')
+    plt.ylabel('Count')
+
+    # Display the chart
+    plt.show()
+    return plt
+
 def plot_against(df, col:str, val):
     # Create a dataframe
     # Plot the x and y columns
-    plt.plot(df[col], df['Total'])
+    plt.bar(df[col], df['Total'])
 
     # Set the title and labels
     plt.title(col )
@@ -151,7 +175,7 @@ def green_score_calc(liv_type, house,diet,how_often_water,heating_energy_source,
     elif (recycling and recycling.find("Food") > 0 ) :
         score += -4    
 
-    #cooking_with = st.text_input("Cooking With stove/coal/electric/microwave (points- 10/20/20/-10/-10)", "stove/coal/wood/electric/microwave", key="cw")
+    #cooking_with = st.text_input("Cooking With stove/coal/wood/electric/microwave (points- 10/20/20/-10/-10)", "stove/coal/wood/electric/microwave", key="cw")
 
 
     if (cooking_with and cooking_with.find("stove") > 0 ) :
@@ -211,7 +235,7 @@ green_score = green_score_calc(liv_type, house,diet,how_often_water,heating_ener
 green_score_message = "Oof! Your carbon footprint is high(> 60). Find ways to reduce your impact on the planet.\n"
 if (green_score < 60):
     green_score_message = "Congratulations! You are doing a great job. Your score is less than 60."
-if chat_message:
+if st.button("show")  or st.chat_message:
     st.chat_message("user").markdown(chat_message)
     res_area = st.chat_message("assistant").empty()
     print("prompt", prompt)
@@ -219,10 +243,15 @@ if chat_message:
         {"role": "user", "parts":  [prompt]},
     )
     res = get_response(messages)
-    # liv_type_plot = plot_against(df, "Living Type", liv_type)
+    plot_transport = plot_against(df, "Transport", 0)
     res_text='Your green score is '+str(green_score)+". "+green_score_message 
     for chunk in response:
         res_text += chunk.parts[0].text
 
     res_area.markdown(res_text)
     messages.append({"role": "model", "parts": [res_text]})
+    st.pyplot(plot_transport.gcf())
+    # plot_food = plot_against(df, "Diet", 0)
+    # st.pyplot(plot_food.gcf())
+    plot_total = plot_total(df, "Total", green_score)
+    st.pyplot(plot_total.gcf())
