@@ -9,6 +9,7 @@ import textwrap
 # from IPython.display import display
 from IPython.display import Markdown
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def to_markdown(text):
   text = text.replace('•', '  *')
@@ -28,6 +29,20 @@ async def get_response(messages, model="gemini-pro"):
                                 safety_settings={'HARASSMENT':'block_none'})
     res.resolve()
     return res
+
+def plot_against(df, col:str, val):
+    # Create a dataframe
+    # Plot the x and y columns
+    plt.plot(df[col], df['Total'])
+
+    # Set the title and labels
+    plt.title(col )
+    plt.xlabel(col)
+    plt.ylabel("Total")
+
+    # Show the plot
+    plt.show()
+    return plt
 
 def green_score_calc(liv_type, house,diet,how_often_water,heating_energy_source,transport,buying_activity,
                                frequency_of_traveling_by_air,waste_bag_week,energy_efficiency,recycling, cooking_with):
@@ -58,15 +73,15 @@ def green_score_calc(liv_type, house,diet,how_often_water,heating_energy_source,
 
     #how_often_water = st.text_input("How Often Do You Use Washing Machine/Dishwasher a week - 3/7  (points- 5/10)", "3", key="water")
 
-    if (how_often_water == 3) :
+    if (int(how_often_water) < 7) :
         score +=5
-    elif (how_often_water==7):
+    elif (int(how_often_water) >=7):
         score+=10
 
     #heating_energy_source = st.text_input("Heating Energy Source-Solar/gas/coal/electricity (points- -10/20/30/10)", "solar", key="ensrc")
 
     if (heating_energy_source == "solar") :
-        score +=10
+        score +=-10
     elif (heating_energy_source=="gas"):
         score+=20
     elif (heating_energy_source=="coal"):
@@ -204,6 +219,7 @@ if chat_message:
         {"role": "user", "parts":  [prompt]},
     )
     res = get_response(messages)
+    # liv_type_plot = plot_against(df, "Living Type", liv_type)
     res_text='Your green score is '+str(green_score)+". "+green_score_message 
     for chunk in response:
         res_text += chunk.parts[0].text
